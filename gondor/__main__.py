@@ -206,12 +206,7 @@ def cmd_deploy(args, config):
             "staticfiles": config_value(local_config, "app", "staticfiles"),
             "site_media_url": config_value(local_config, "app", "site_media_url"),
         }
-        include_files = []
-        cwd = os.getcwd()
-        os.chdir(utils.find_nearest(os.getcwd(), ".git"))
-        for x in config_value(local_config, "files", "include", "").split("\n"):
-            include_files += glob.glob(x)
-        os.chdir(cwd)
+        include_expr = config_value(local_config, "files", "include", "").split("\n")
         
         out("[ok]\n")
         
@@ -253,6 +248,13 @@ def cmd_deploy(args, config):
         if check != 0:
             error(output)
         out("[ok]\n")
+        
+        include_files = []
+        cwd = os.getcwd()
+        os.chdir(repo_root)
+        for x in include_expr:
+            include_files += glob.glob(x)
+        os.chdir(cwd)
         
         if include_files:
             out("Adding untracked files... ")
