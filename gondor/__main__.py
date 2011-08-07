@@ -1,6 +1,7 @@
 import argparse
 import ConfigParser
 import getpass
+import glob
 import gzip
 import os
 import re
@@ -205,11 +206,13 @@ def cmd_deploy(args, config):
             "staticfiles": config_value(local_config, "app", "staticfiles"),
             "site_media_url": config_value(local_config, "app", "site_media_url"),
         }
-        include_files = [
-            x.strip()
-            for x in config_value(local_config, "files", "include", "").split("\n")
-            if x
-        ]
+        include_files = []
+        cwd = os.getcwd()
+        os.chdir(utils.find_nearest(os.getcwd(), ".git"))
+        for x in config_value(local_config, "files", "include", "").split("\n"):
+            include_files += glob.glob(x)
+        os.chdir(cwd)
+        
         out("[ok]\n")
         
         if vcs == "git":
